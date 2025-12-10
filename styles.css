@@ -350,7 +350,7 @@ img {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('./backgroundHero3.png'); /* Coloca tu imagen aquí */
+    background-image: url('./backgroundHero4.png'); /* Coloca tu imagen aquí */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -365,7 +365,7 @@ img {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(0, 40, 80, 0.541) 0%, rgba(0, 20, 40, 0.233) 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.074) 0%, rgba(255, 255, 255, 0.143) 100%);
     z-index: 1;
 }
 
