@@ -1,32 +1,56 @@
 [
   {
     "id": 1,
-    "service": "Reparación de pantalla TV",
-    "price": 20000,
+    "service": "Presupuestos para seguros",
+    "price": 40000,
     "time": "24-48hs"
   },
   {
     "id": 2,
-    "service": "Cambio de placa madre TV",
-    "price": 25000,
+    "service": "Cambio de placa madre TV 32 a 43 Pulgadas",
+    "price": 82000,
     "time": "48hs"
   },
   {
     "id": 3,
     "service": "Reparación de magnetrón microondas",
-    "price": 15000,
+    "price": 75000,
     "time": "24hs"
   },
   {
     "id": 4,
-    "service": "Limpieza profunda microondas",
-    "price": 8000,
-    "time": "2-3hs"
+    "service": "Fuente de alta tensión",
+    "price": 72000,
+    "time": "24 hs"
   },
   {
     "id": 5,
-    "service": "prueba",
-    "price": 3333,
-    "time": "33hs"
+    "service": "Cambio de Led de 43 a 47 Pulgadas",
+    "price": 135000,
+    "time": "48hs"
+  },
+  {
+    "id": 6,
+    "service": "Cambio de led 32 Pulgadas",
+    "price": 75000,
+    "time": "24 a 48hs"
+  },
+  {
+    "id": 7,
+    "service": "Cambio de led 50 a 55 pulgadas",
+    "price": 160000,
+    "time": "24 a 48hs"
+  },
+  {
+    "id": 8,
+    "service": "Cambio de led 65 Pulgadas (depende del TV)",
+    "price": 260000,
+    "time": "48 a 72hs"
+  },
+  {
+    "id": 9,
+    "service": "Reparación completa de fuente de alimentación 43 a 55 Pulghadas ( depende el daño )",
+    "price": 120000,
+    "time": "24 a 48hs"
   }
 ]
