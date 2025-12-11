@@ -365,7 +365,8 @@ function finalizeEditing() {
             const servicesJson = JSON.stringify(servicesData, null, 2);
             message += `services.json
 
-${servicesJson}`;
+${servicesJson}
+https://github.com/Baldezari00/servicio-tecnico-guillermo/edit/main/data/services.json`;
         }
         
         if (editedFiles.prices) {
@@ -373,7 +374,8 @@ ${servicesJson}`;
             const pricesJson = JSON.stringify(pricesData, null, 2);
             message += `prices.json
 
-${pricesJson}`;
+${pricesJson}
+https://github.com/Baldezari00/servicio-tecnico-guillermo/edit/main/data/prices.json`;
         }
         
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
