@@ -1,6 +1,7 @@
 // ========================================
 // HASH DE CONTRASEÑA (SHA-256)
 // ========================================
+
 async function hashPassword(password) {
     const encoder = new TextEncoder();
     const data = encoder.encode(password);
@@ -9,66 +10,164 @@ async function hashPassword(password) {
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     return hashHex;
 }
+// ========================================
+// CARGAR DATOS DESDE JSON
+// ========================================
+let servicesData = [];
+let pricesData = [];
+
+// Control de archivos editados
+let editedFiles = {
+    services: false,
+    prices: false
+};
+
+
+// Datos embebidos como respaldo
+const EMBEDDED_SERVICES = [
+    {
+        id: 1,
+        name: "TELEVISORES",
+        icon: "📺",
+        items: [
+            "Reparación de pantalla",
+            "Cambio de placa madre",
+            "Reparación de fuente de alimentación",
+            "Configuración y sintonización",
+            "Actualización de software",
+            "Reparación de audio",
+            "Cambio de backlight LED",
+            "Reparación de entrada HDMI",
+            "Instalación y soporte en pared"
+        ],
+        price: 15000
+    },
+    {
+        id: 2,
+        name: "MICROONDAS",
+        icon: "🔥",
+        items: [
+            "Reparación de magnetrón",
+            "Cambio de plato giratorio",
+            "Reparación de panel de control",
+            "Cambio de puerta y bisagras",
+            "Reparación de sistema de calentamiento",
+            "Limpieza profunda interna",
+            "Cambio de fusible térmico",
+            "Reparación de timer"
+        ],
+        price: 12000
+    }
+];
+
+const EMBEDDED_PRICES = [
+    { id: 1, service: "Reparación de pantalla TV", price: 20000, time: "24-48hs" },
+    { id: 2, service: "Cambio de placa madre TV", price: 25000, time: "48hs" },
+    { id: 3, service: "Reparación de magnetrón microondas", price: 15000, time: "24hs" },
+    { id: 4, service: "Limpieza profunda microondas", price: 8000, time: "2-3hs" }
+];
+
+async function loadData() {
+    const timestamp = Date.now();
+    
+    // Detectar si estamos en GitHub Pages o local
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const basePath = isGitHubPages ? '/Trabajo-web-reparacion_tecnicos/' : './';
+    
+    try {
+        console.log('🔍 Cargando desde:', basePath);
+        
+        const servicesUrl = `${basePath}data/services.json?t=${timestamp}`;
+        const pricesUrl = `${basePath}data/prices.json?t=${timestamp}`;
+        
+        console.log('📂 Services URL:', servicesUrl);
+        console.log('📂 Prices URL:', pricesUrl);
+        
+        const [servicesResponse, pricesResponse] = await Promise.all([
+            fetch(servicesUrl),
+            fetch(pricesUrl)
+        ]);
+        
+        console.log('📊 Services status:', servicesResponse.status);
+        console.log('📊 Prices status:', pricesResponse.status);
+        
+        if (servicesResponse.ok && pricesResponse.ok) {
+            servicesData = await servicesResponse.json();
+            pricesData = await pricesResponse.json();
+            console.log('✅ Datos cargados desde JSON');
+            console.log('✅ Servicios:', servicesData.length);
+            console.log('✅ Precios:', pricesData.length);
+        } else {
+            throw new Error(`Error HTTP: ${servicesResponse.status} / ${pricesResponse.status}`);
+        }
+    } catch (error) {
+        console.warn('⚠️ No se pudieron cargar los JSON:', error.message);
+        console.log('📦 Usando datos embebidos');
+        servicesData = EMBEDDED_SERVICES;
+        pricesData = EMBEDDED_PRICES;
+    } finally {
+        renderServices();
+        renderPrices();
+    }
+}
+// Datos por defecto si no se pueden cargar los JSON
+function getDefaultServices() {
+    return [
+        {
+            id: 1,
+            name: "TELEVISORES",
+            icon: "📺",
+            items: [
+                "Reparación de pantalla",
+                "Cambio de placa madre",
+                "Reparación de fuente de alimentación",
+                "Configuración y sintonización",
+                "Actualización de software",
+                "Reparación de audio",
+                "Cambio de backlight LED",
+                "Reparación de entrada HDMI",
+                "Instalación y soporte en pared"
+            ],
+            price: 15000
+        },
+        {
+            id: 2,
+            name: "MICROONDAS",
+            icon: "🔥",
+            items: [
+                "Reparación de magnetrón",
+                "Cambio de plato giratorio",
+                "Reparación de panel de control",
+                "Cambio de puerta y bisagras",
+                "Reparación de sistema de calentamiento",
+                "Limpieza profunda interna",
+                "Cambio de fusible térmico",
+                "Reparación de timer"
+            ],
+            price: 12000
+        }
+    ];
+}
+
+function getDefaultPrices() {
+    return [
+        { id: 1, service: "Reparación de pantalla TV", price: 20000, time: "24-48hs" },
+        { id: 2, service: "Cambio de placa madre TV", price: 25000, time: "48hs" },
+        { id: 3, service: "Reparación de magnetrón microondas", price: 15000, time: "24hs" },
+        { id: 4, service: "Limpieza profunda microondas", price: 8000, time: "2-3hs" }
+    ];
+}
+
 
 // ========================================
-// INICIALIZACIÓN DE DATOS
+// INICIALIZACIÓN DE CONTRASEÑA
 // ========================================
-function initializeData() {
+function initializePassword() {
     // Contraseña por defecto: "admin123" (hasheada)
     if (!localStorage.getItem('adminPasswordHash')) {
         hashPassword('admin123').then(hash => {
             localStorage.setItem('adminPasswordHash', hash);
         });
-    }
-    
-    // Servicios iniciales
-    if (!localStorage.getItem('services')) {
-        const defaultServices = [
-            {
-                id: Date.now() + 1,
-                name: 'CELULARES Y TABLETS',
-                icon: '📱',
-                items: ['Cambio de pantalla táctil', 'Reemplazo de batería', 'Reparación de puerto de carga', 'Cambio de cámara', 'Liberación de equipos', 'Actualización de software'],
-                price: 8000
-            },
-            {
-                id: Date.now() + 2,
-                name: 'NOTEBOOKS Y PCS',
-                icon: '💻',
-                items: ['Reparación de placa madre', 'Cambio de disco duro/SSD', 'Upgrade de RAM', 'Limpieza profunda', 'Instalación de Windows', 'Recuperación de datos'],
-                price: 12000
-            },
-            {
-                id: Date.now() + 3,
-                name: 'AIRES ACONDICIONADOS',
-                icon: '❄️',
-                items: ['Carga de gas', 'Limpieza completa', 'Reparación de filtros', 'Service preventivo', 'Cambio de compresor', 'Instalación y mudanza'],
-                price: 15000
-            },
-            {
-                id: Date.now() + 4,
-                name: 'ELECTRODOMÉSTICOS',
-                icon: '🔌',
-                items: ['Heladeras y freezers', 'Lavarropas y secarropas', 'Microondas', 'Cocinas y hornos', 'Aspiradoras', 'Service preventivo'],
-                price: 10000
-            }
-        ];
-        localStorage.setItem('services', JSON.stringify(defaultServices));
-    }
-    
-    // Precios iniciales
-    if (!localStorage.getItem('prices')) {
-        const defaultPrices = [
-            { id: Date.now() + 1, service: 'Cambio de pantalla celular', price: 8000, time: '24hs' },
-            { id: Date.now() + 2, service: 'Reemplazo de batería', price: 5000, time: '1-2hs' },
-            { id: Date.now() + 3, service: 'Reparación placa madre notebook', price: 15000, time: '48hs' },
-            { id: Date.now() + 4, service: 'Instalación Windows + drivers', price: 4000, time: '3-4hs' },
-            { id: Date.now() + 5, service: 'Carga de gas aire acondicionado', price: 18000, time: '24hs' },
-            { id: Date.now() + 6, service: 'Limpieza completa aire split', price: 12000, time: '2-3hs' },
-            { id: Date.now() + 7, service: 'Reparación heladera (diagnóstico)', price: 10000, time: '48-72hs' },
-            { id: Date.now() + 8, service: 'Reparación lavarropas', price: 12000, time: '48hs' }
-        ];
-        localStorage.setItem('prices', JSON.stringify(defaultPrices));
     }
 }
 
@@ -77,9 +176,13 @@ function initializeData() {
 // ========================================
 function renderServices() {
     const servicesGrid = document.getElementById('servicesGrid');
-    const services = JSON.parse(localStorage.getItem('services') || '[]');
     
-    servicesGrid.innerHTML = services.map(service => `
+    if (!servicesData || servicesData.length === 0) {
+        servicesGrid.innerHTML = '<p style="text-align:center;grid-column:1/-1;">Cargando servicios...</p>';
+        return;
+    }
+    
+    servicesGrid.innerHTML = servicesData.map(service => `
         <div class="service-card">
             <div class="service-icon">${service.icon}</div>
             <h3>${service.name}</h3>
@@ -97,9 +200,13 @@ function renderServices() {
 // ========================================
 function renderPrices() {
     const pricingTableBody = document.getElementById('pricingTableBody');
-    const prices = JSON.parse(localStorage.getItem('prices') || '[]');
     
-    pricingTableBody.innerHTML = prices.map(price => `
+    if (!pricesData || pricesData.length === 0) {
+        pricingTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Cargando precios...</td></tr>';
+        return;
+    }
+    
+    pricingTableBody.innerHTML = pricesData.map(price => `
         <tr>
             <td>${price.service}</td>
             <td>$${price.price.toLocaleString('es-AR')}</td>
@@ -107,6 +214,8 @@ function renderPrices() {
         </tr>
     `).join('');
 }
+
+
 
 // ========================================
 // ADMIN - ABRIR/CERRAR LOGIN
@@ -120,6 +229,10 @@ function openAdminLogin() {
 function closeAdminLogin() {
     document.getElementById('adminLoginModal').style.display = 'none';
 }
+
+
+
+
 
 // ========================================
 // ADMIN - LOGIN
@@ -155,19 +268,145 @@ function openAdminPanel() {
 }
 
 function closeAdminPanel() {
+    // Preguntar si hay cambios sin enviar
+    if (editedFiles.services || editedFiles.prices) {
+        if (confirm('Hay cambios sin enviar. ¿Querés cerrar sin enviar?')) {
+            editedFiles.services = false;
+            editedFiles.prices = false;
+        } else {
+            return; // No cerrar
+        }
+    }
+    
     document.getElementById('adminPanel').style.display = 'none';
     cancelEditService();
     cancelEditPrice();
 }
+// ========================================
+// ADMIN - FINALIZAR EDICIÓN Y ENVIAR TODO
+// ========================================
+function finalizeEditing() {
+    // Verificar si hay archivos editados
+    if (!editedFiles.services && !editedFiles.prices) {
+        showToast('⚠ No hay cambios para enviar');
+        return;
+    }
+    
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+    `;
+    
+    // Determinar qué archivos se van a enviar
+    const filesToSend = [];
+    if (editedFiles.services) filesToSend.push('services.json');
+    if (editedFiles.prices) filesToSend.push('prices.json');
+    
+    modal.innerHTML = `
+        <h3 style="margin-bottom: 20px; color: #1f2937;">🎯 Finalizar edición</h3>
+        <p style="margin-bottom: 25px; color: #6b7280;">Se enviarán: ${filesToSend.join(' y ')}</p>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button id="sendAllBtn" style="
+                padding: 15px;
+                background: #25D366;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                font-weight: bold;
+            ">
+                📱 Enviar por WhatsApp
+            </button>
+            <button id="cancelFinalizeBtn" style="
+                padding: 15px;
+                background: #6b7280;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                font-weight: bold;
+            ">
+                ❌ Cancelar
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    // Botón Enviar
+    document.getElementById('sendAllBtn').addEventListener('click', () => {
+        const phoneNumber = '542235254889';
+        let message = '';
+        
+        // Solo incluir archivos editados
+        if (editedFiles.services) {
+            const servicesJson = JSON.stringify(servicesData, null, 2);
+            message += `services.json
 
+${servicesJson}`;
+        }
+        
+        if (editedFiles.prices) {
+            if (message) message += '\n\n━━━━━━━━━━━━━━━━\n\n';
+            const pricesJson = JSON.stringify(pricesData, null, 2);
+            message += `prices.json
+
+${pricesJson}`;
+        }
+        
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+        
+        // Resetear flags de edición
+        editedFiles.services = false;
+        editedFiles.prices = false;
+        
+        document.body.removeChild(overlay);
+        closeAdminPanel();
+        showToast('✓ Enviando cambios por WhatsApp...');
+    });
+    
+    // Botón Cancelar
+    document.getElementById('cancelFinalizeBtn').addEventListener('click', () => {
+        document.body.removeChild(overlay);
+    });
+    
+    // Cerrar al hacer click fuera
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    });
+}
 // ========================================
 // ADMIN - GESTIÓN DE SERVICIOS
 // ========================================
 function renderAdminServices() {
     const servicesList = document.getElementById('servicesList');
-    const services = JSON.parse(localStorage.getItem('services') || '[]');
     
-    servicesList.innerHTML = services.map(service => `
+    servicesList.innerHTML = servicesData.map(service => `
         <div class="service-item">
             <div class="service-item-info">
                 <h4>${service.icon} ${service.name}</h4>
@@ -200,13 +439,11 @@ function saveService() {
         return;
     }
     
-    const services = JSON.parse(localStorage.getItem('services') || '[]');
-    
     if (id) {
         // Editar existente
-        const index = services.findIndex(s => s.id === parseInt(id));
+        const index = servicesData.findIndex(s => s.id === parseInt(id));
         if (index !== -1) {
-            services[index] = {
+            servicesData[index] = {
                 id: parseInt(id),
                 name: name.toUpperCase(),
                 icon,
@@ -216,8 +453,9 @@ function saveService() {
         }
     } else {
         // Crear nuevo
-        services.push({
-            id: Date.now(),
+        const newId = servicesData.length > 0 ? Math.max(...servicesData.map(s => s.id)) + 1 : 1;
+        servicesData.push({
+            id: newId,
             name: name.toUpperCase(),
             icon,
             items,
@@ -225,16 +463,14 @@ function saveService() {
         });
     }
     
-    localStorage.setItem('services', JSON.stringify(services));
+    editedFiles.services = true; // Marcar como editado
+    showDataToSave('services', servicesData);
     renderAdminServices();
     renderServices();
     cancelEditService();
-    showToast('✓ Servicio guardado exitosamente');
 }
-
 function editService(id) {
-    const services = JSON.parse(localStorage.getItem('services') || '[]');
-    const service = services.find(s => s.id === id);
+    const service = servicesData.find(s => s.id === id);
     
     if (service) {
         document.getElementById('editServiceId').value = service.id;
@@ -248,9 +484,9 @@ function editService(id) {
 
 function deleteService(id) {
     if (confirm('¿Estás seguro de eliminar este servicio?')) {
-        let services = JSON.parse(localStorage.getItem('services') || '[]');
-        services = services.filter(s => s.id !== id);
-        localStorage.setItem('services', JSON.stringify(services));
+        servicesData = servicesData.filter(s => s.id !== id);
+        editedFiles.services = true; // Marcar como editado
+        showDataToSave('services', servicesData);
         renderAdminServices();
         renderServices();
         showToast('✓ Servicio eliminado');
@@ -270,9 +506,8 @@ function cancelEditService() {
 // ========================================
 function renderAdminPrices() {
     const pricesList = document.getElementById('pricesList');
-    const prices = JSON.parse(localStorage.getItem('prices') || '[]');
     
-    pricesList.innerHTML = prices.map(price => `
+    pricesList.innerHTML = pricesData.map(price => `
         <div class="price-item">
             <div class="price-item-info">
                 <h4>${price.service}</h4>
@@ -302,13 +537,11 @@ function savePrice() {
         time = time + 'hs';
     }
     
-    const prices = JSON.parse(localStorage.getItem('prices') || '[]');
-    
     if (id) {
         // Editar existente
-        const index = prices.findIndex(p => p.id === parseInt(id));
+        const index = pricesData.findIndex(p => p.id === parseInt(id));
         if (index !== -1) {
-            prices[index] = {
+            pricesData[index] = {
                 id: parseInt(id),
                 service,
                 price: parseInt(amount),
@@ -317,24 +550,23 @@ function savePrice() {
         }
     } else {
         // Crear nuevo
-        prices.push({
-            id: Date.now(),
+        const newId = pricesData.length > 0 ? Math.max(...pricesData.map(p => p.id)) + 1 : 1;
+        pricesData.push({
+            id: newId,
             service,
             price: parseInt(amount),
             time
         });
     }
     
-    localStorage.setItem('prices', JSON.stringify(prices));
+    editedFiles.prices = true; // Marcar como editado
+    showDataToSave('prices', pricesData);
     renderAdminPrices();
     renderPrices();
     cancelEditPrice();
-    showToast('✓ Precio guardado exitosamente');
 }
-
 function editPrice(id) {
-    const prices = JSON.parse(localStorage.getItem('prices') || '[]');
-    const price = prices.find(p => p.id === id);
+    const price = pricesData.find(p => p.id === id);
     
     if (price) {
         document.getElementById('editPriceId').value = price.id;
@@ -344,12 +576,11 @@ function editPrice(id) {
         document.getElementById('priceService').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
-
 function deletePrice(id) {
     if (confirm('¿Estás seguro de eliminar este precio?')) {
-        let prices = JSON.parse(localStorage.getItem('prices') || '[]');
-        prices = prices.filter(p => p.id !== id);
-        localStorage.setItem('prices', JSON.stringify(prices));
+        pricesData = pricesData.filter(p => p.id !== id);
+        editedFiles.prices = true; // Marcar como editado
+        showDataToSave('prices', pricesData);
         renderAdminPrices();
         renderPrices();
         showToast('✓ Precio eliminado');
@@ -363,6 +594,131 @@ function cancelEditPrice() {
     document.getElementById('priceTime').value = '';
 }
 
+// ========================================
+// MOSTRAR DATOS PARA GUARDAR Y ENVIAR POR WHATSAPP
+// ========================================
+function showDataToSave(type, data) {
+    const fileName = type === 'services' ? 'services.json' : 'prices.json';
+    const jsonContent = JSON.stringify(data, null, 2);
+    
+    const message = `
+✓ Cambios guardados temporalmente!
+
+¿Qué querés hacer?
+
+ENVIAR POR WHATSAPP
+    `;
+    
+        // Mostrar opciones
+        showWhatsAppOptions(fileName, jsonContent);
+    
+}
+
+function showWhatsAppOptions(fileName, jsonContent) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+    `;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+    `;
+    
+    modal.innerHTML = `
+        <h3 style="margin-bottom: 20px; color: #1f2937;">✓ Cambios guardados</h3>
+        <p style="margin-bottom: 25px; color: #6b7280;">¿Qué querés hacer?</p>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button id="continueEditBtn" style="
+                padding: 15px;
+                background: #2563EB;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                font-weight: bold;
+            ">
+                ✏️ Seguir Editando
+            </button>
+            <button id="whatsappBtn" style="
+                padding: 15px;
+                background: #25D366;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                font-weight: bold;
+            ">
+                📱 Enviar por WhatsApp y Terminar
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+   
+    // Botón Seguir Editando
+    document.getElementById('continueEditBtn').addEventListener('click', () => {
+        document.body.removeChild(overlay);
+        showToast('✓ Continúa editando. Los cambios se guardan automáticamente.');
+    });
+    
+    // Botón WhatsApp - HACE LO MISMO QUE "FINALIZAR Y ENVIAR TODO"
+    document.getElementById('whatsappBtn').addEventListener('click', () => {
+        const phoneNumber = '542235254889';
+        let message = '';
+        
+        // Solo incluir archivos editados
+        if (editedFiles.services) {
+            const servicesJson = JSON.stringify(servicesData, null, 2);
+            message += `services.json
+
+${servicesJson}`;
+        }
+        
+        if (editedFiles.prices) {
+            if (message) message += '\n\n━━━━━━━━━━━━━━━━\n\n';
+            const pricesJson = JSON.stringify(pricesData, null, 2);
+            message += `prices.json
+
+${pricesJson}`;
+        }
+        
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+        
+        // Resetear flags de edición
+        editedFiles.services = false;
+        editedFiles.prices = false;
+        
+        document.body.removeChild(overlay);
+        closeAdminPanel();
+        showToast('✓ Enviando cambios por WhatsApp...');
+    });
+    
+    // Cerrar al hacer click fuera del modal
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    });
+}
 // ========================================
 // ADMIN - CAMBIAR CONTRASEÑA
 // ========================================
@@ -793,8 +1149,7 @@ console.log('Visitas:', visitCount);
 // INICIALIZACIÓN AL CARGAR LA PÁGINA
 // ========================================
 document.addEventListener('DOMContentLoaded', () => {
-    initializeData();
-    renderServices();
-    renderPrices();
+    initializePassword();
+    loadData();
 });
 

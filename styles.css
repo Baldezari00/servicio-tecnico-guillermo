@@ -1581,6 +1581,10 @@ img {
    RESPONSIVE MOBILE
    ======================================== */
 @media (max-width: 768px) {
+    #logoImage{
+        width: 80px;
+        height: 80px;
+    }
     .nav {
         position: absolute;
         top: 100%;
@@ -1705,6 +1709,10 @@ img {
 }
 
 @media (max-width: 480px) {
+    #logoImage{
+        width: 60px;
+        height: 60px;
+    }
     .container {
         padding: 0 15px;
     }
