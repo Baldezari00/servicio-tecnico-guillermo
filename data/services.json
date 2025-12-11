@@ -2,24 +2,23 @@
   {
     "id": 1,
     "name": "TELEVISORES",
-    "icon": "📺",
+    "icon": "Reparación Básica y configuración",
     "items": [
-      "Reparación de pantalla",
+      "Pantallas no se consiguen",
       "Cambio de placa madre",
       "Reparación de fuente de alimentación",
-      "Configuración y sintonización",
       "Actualización de software",
       "Reparación de audio",
       "Cambio de backlight LED",
       "Reparación de entrada HDMI",
-      "Instalación y soporte en pared"
+      "Reparación de sintonizadores"
     ],
-    "price": 15000
+    "price": 65000
   },
   {
     "id": 2,
     "name": "MICROONDAS",
-    "icon": "🔥",
+    "icon": "Servicio de básico y ajustes",
     "items": [
       "Reparación de magnetrón",
       "Cambio de plato giratorio",
@@ -30,6 +29,6 @@
       "Cambio de fusible térmico",
       "Reparación de timer"
     ],
-    "price": 12000
+    "price": 45000
   }
 ]
