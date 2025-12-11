@@ -72,7 +72,7 @@ async function loadData() {
     
     // Detectar si estamos en GitHub Pages o local
     const isGitHubPages = window.location.hostname.includes('github.io');
-    const basePath = isGitHubPages ? '/Trabajo-web-reparacion_tecnicos/' : './';
+    const basePath = isGitHubPages ? '/servicio-tecnico-guillermo/' : './';
     
     try {
         console.log('🔍 Cargando desde:', basePath);
